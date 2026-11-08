@@ -31,6 +31,48 @@ function highlightVariables(text) {
   return escaped.replace(/(\[[A-Z0-9_\s,.-]+\])/g, '<span class="prompt-var">$1</span>');
 }
 
+// Helper: shuffle array
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Helper: check if a prompt is girl/female-focused
+function isGirlPrompt(p) {
+  const text = ((p.title || '') + ' ' + (p.tags || '') + ' ' + (p.short_description || '') + ' ' + (p.prompt_content || '')).toLowerCase();
+  const hasGirl = /\b(girl|girls|woman|women|female|saree|lady|she|her|bride|model|queen|princess|actress|femme|mulher|garota)\b/.test(text);
+  const hasBoy = /\b(boy|boys|man|men|male|guy|gentleman|homem|ele)\b/.test(text);
+  return hasGirl && !hasBoy;
+}
+
+// Helper: randomize prompts with heavy bias towards girls side
+function randomizeWithGirlsBias(promptsList) {
+  if (!promptsList || promptsList.length <= 1) return promptsList || [];
+  const girls = shuffleArray(promptsList.filter(p => isGirlPrompt(p)));
+  const others = shuffleArray(promptsList.filter(p => !isGirlPrompt(p)));
+  const result = [];
+  let gIdx = 0;
+  let oIdx = 0;
+  while (gIdx < Math.min(6, girls.length)) {
+    result.push(girls[gIdx++]);
+  }
+  while (gIdx < girls.length || oIdx < others.length) {
+    for (let k = 0; k < 3 && gIdx < girls.length; k++) {
+      result.push(girls[gIdx++]);
+    }
+    if (oIdx < others.length) {
+      result.push(others[oIdx++]);
+    } else if (gIdx < girls.length) {
+      result.push(girls[gIdx++]);
+    }
+  }
+  return result;
+}
+
 /**
  * Generate clean URL slug from title
  * The prompt title is used as the prompt page name
@@ -474,7 +516,7 @@ async function build() {
 
   // 3. Pre-render initial cards into index.html for instant First Contentful Paint (<100ms)
   console.log('Pre-rendering initial 12 cards directly into index.html...');
-  const initialBatch = publishedPrompts.slice(0, 12);
+  const initialBatch = randomizeWithGirlsBias(publishedPrompts).slice(0, 12);
   const initialCardsHtml = initialBatch.map((p, idx) => renderPromptCard(p, idx)).join('\n');
   const regex = /(<div\s+class="masonry-container"\s+id="masonry-gallery-grid">)[\s\S]*?(<\/div>\s*<\/main>)/;
 

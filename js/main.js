@@ -220,25 +220,22 @@ async function initHomePage() {
   const data = await API.getPublicData();
 
   // Filter out dummy/sample prompts (like p_001) so only user's prompts show
-  homeAllPrompts = (data.prompts || []).filter(p =>
+  const rawPrompts = (data.prompts || []).filter(p =>
     String(p.status).toLowerCase() === 'published' &&
     p.id !== 'p_001' &&
     !p.title.includes('ChatGPT SEO Blog Writer')
   );
 
+  // Randomize all prompts with high bias towards girls side on every visit/refresh
+  homeAllPrompts = randomizeWithGirlsBias(rawPrompts);
+  currentFilterPrompts = homeAllPrompts;
+
   homeAllCategories = data.categories || [];
 
   const galleryGrid = document.getElementById('masonry-gallery-grid');
   if (galleryGrid) {
-    const existingCards = galleryGrid.querySelectorAll('.prompt-masonry-card');
-    if (existingCards.length > 0) {
-      // Instant Hydration: Keep pre-rendered HTML cards and arm infinite scroll
-      currentFilterPrompts = homeAllPrompts;
-      currentDisplayedCount = existingCards.length;
-      setupSentinel();
-    } else {
-      renderGallery(homeAllPrompts, true);
-    }
+    // Dynamically render the freshly randomized, girls-biased gallery on every visit
+    renderGallery(homeAllPrompts, true);
   }
 
   // Populate Libraries in the Full-Screen Search Modal (Screenshot 4)
@@ -259,11 +256,12 @@ async function initHomePage() {
   // Listen for background data updates
   window.addEventListener('promptforge:data-updated', (e) => {
     if (e.detail && Array.isArray(e.detail.prompts)) {
-      homeAllPrompts = e.detail.prompts.filter(p =>
+      const updated = e.detail.prompts.filter(p =>
         String(p.status).toLowerCase() === 'published' &&
         p.id !== 'p_001' &&
         !p.title.includes('ChatGPT SEO Blog Writer')
       );
+      homeAllPrompts = randomizeWithGirlsBias(updated);
       homeAllCategories = e.detail.categories || homeAllCategories;
       populateLibrariesModal(homeAllPrompts);
     }
@@ -421,19 +419,66 @@ function showAllLoadedIndicator() {
   }
 }
 
+// Fisher-Yates array shuffle utility
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Check if a prompt is girl/female-focused
+function isGirlPrompt(p) {
+  const text = ((p.title || '') + ' ' + (p.tags || '') + ' ' + (p.short_description || '') + ' ' + (p.prompt_content || '')).toLowerCase();
+  const hasGirl = /\b(girl|girls|woman|women|female|saree|lady|she|her|bride|model|queen|princess|actress|femme|mulher|garota)\b/.test(text);
+  const hasBoy = /\b(boy|boys|man|men|male|guy|gentleman|homem|ele)\b/.test(text);
+  return hasGirl && !hasBoy;
+}
+
+function getGenderScore(p) {
+  if (isGirlPrompt(p)) return 3;
+  const text = ((p.title || '') + ' ' + (p.tags || '') + ' ' + (p.short_description || '')).toLowerCase();
+  const isCouple = /\bcouple\b|\bromantic\b|\bwedding\b/.test(text);
+  if (isCouple) return 2;
+  return 1;
+}
+
+// Randomize prompts with heavy bias towards girls side (~80% girls, fresh shuffle on every visit)
+function randomizeWithGirlsBias(promptsList) {
+  if (!promptsList || promptsList.length <= 1) return promptsList || [];
+
+  const girls = shuffleArray(promptsList.filter(p => isGirlPrompt(p)));
+  const others = shuffleArray(promptsList.filter(p => !isGirlPrompt(p)));
+
+  const result = [];
+  let gIdx = 0;
+  let oIdx = 0;
+
+  // The first 6 items are ALWAYS stunning randomly selected girls prompts
+  while (gIdx < Math.min(6, girls.length)) {
+    result.push(girls[gIdx++]);
+  }
+
+  // Interleave remaining: 3 girls prompts for every 1 other prompt (75-80% girls bias)
+  while (gIdx < girls.length || oIdx < others.length) {
+    for (let k = 0; k < 3 && gIdx < girls.length; k++) {
+      result.push(girls[gIdx++]);
+    }
+    if (oIdx < others.length) {
+      result.push(others[oIdx++]);
+    } else if (gIdx < girls.length) {
+      result.push(girls[gIdx++]);
+    }
+  }
+
+  return result;
+}
+
 // Helper to prioritize Girls prompts across feeds and views
 function prioritizeGirlsPrompts(list) {
-  function getGenderScore(p) {
-    const text = ((p.title || '') + ' ' + (p.tags || '') + ' ' + (p.short_description || '')).toLowerCase();
-    const isGirl = /\bgirl\b|\bgirls\b|\bwoman\b|\bwomen\b|\bfemale\b|\bsaree\b|\blady\b/.test(text);
-    const isBoy = /\bboy\b|\bboys\b|\bman\b|\bmen\b|\bmale\b|\bguy\b/.test(text);
-    const isCouple = /\bcouple\b|\bromantic\b|\bwedding\b/.test(text);
-    if (isGirl && !isBoy) return 3;
-    if (isCouple || (isGirl && isBoy)) return 2;
-    if (!isGirl && !isBoy) return 1;
-    return 0;
-  }
-  return [...list].sort((a, b) => getGenderScore(b) - getGenderScore(a));
+  return randomizeWithGirlsBias(list);
 }
 
 // Category Navigation Pill Handler (Screenshot 2: Latest, Trending, Popular, Premium)
