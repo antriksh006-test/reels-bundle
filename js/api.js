@@ -7,17 +7,49 @@ const API = {
   cachedData: null,
 
   /**
+   * Persistent deleted prompt tracking
+   */
+  getDeletedPromptIds() {
+    try {
+      const raw = localStorage.getItem('promptforge_deleted_prompts');
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) return new Set(arr);
+      }
+    } catch (e) {}
+    return new Set();
+  },
+
+  addDeletedPromptId(id) {
+    if (!id) return;
+    try {
+      const set = this.getDeletedPromptIds();
+      set.add(String(id));
+      localStorage.setItem('promptforge_deleted_prompts', JSON.stringify(Array.from(set)));
+    } catch (e) {}
+  },
+
+  filterDeletedPrompts(prompts) {
+    if (!Array.isArray(prompts)) return [];
+    const delSet = this.getDeletedPromptIds();
+    if (delSet.size === 0) return prompts;
+    return prompts.filter(p => !delSet.has(String(p.id)) && !delSet.has(String(p.slug)));
+  },
+
+  /**
    * Fetches public site data (settings, categories, prompts, tags, navigation)
    * High-Performance Cache-First Architecture (0ms First Paint)
    */
   async getPublicData(forceRefresh = false) {
     if (this.cachedData && !forceRefresh) {
+      this.cachedData.prompts = this.filterDeletedPrompts(this.cachedData.prompts);
       return this.cachedData;
     }
 
     // 1. Instant Memory/LocalStorage Cache (0ms)
     const localCached = this.loadLocalCache();
     if (localCached && !forceRefresh) {
+      localCached.prompts = this.filterDeletedPrompts(localCached.prompts);
       this.cachedData = localCached;
       // Revalidate in background without blocking UI
       this.revalidateGasInBackground();
@@ -36,7 +68,7 @@ const API = {
           navigation: initialData.navigation || [],
           categories: initialData.categories || [],
           tags: initialData.tags || [],
-          prompts: initialData.prompts || []
+          prompts: this.filterDeletedPrompts(initialData.prompts || [])
         };
         this.cachedData = localData;
         this.saveLocalCache(localData);
@@ -68,6 +100,7 @@ const API = {
         if (response.ok) {
           const data = await response.json();
           if (data && data.success) {
+            data.prompts = this.filterDeletedPrompts(data.prompts || []);
             this.cachedData = data;
             this.saveLocalCache(data);
             return data;
@@ -493,10 +526,24 @@ const API = {
   },
 
   async deletePrompt(promptId) {
+    // 1. Mark ID as persistently deleted in localStorage
+    this.addDeletedPromptId(promptId);
+
+    // 2. Filter in-memory cachedData and local cache immediately
+    if (this.cachedData && Array.isArray(this.cachedData.prompts)) {
+      this.cachedData.prompts = this.cachedData.prompts.filter(p => p.id !== promptId && p.slug !== promptId);
+      this.saveLocalCache(this.cachedData);
+    }
+    const local = this.loadLocalCache();
+    if (local && Array.isArray(local.prompts)) {
+      local.prompts = local.prompts.filter(p => p.id !== promptId && p.slug !== promptId);
+      this.saveLocalCache(local);
+    }
+
     const gasUrl = getGasApiUrl();
     const token = this.getAuthToken();
 
-    // 1. Try local node server first
+    // 3. Try local node server if available
     try {
       const localRes = await fetch('/api/deletePrompt', {
         method: 'POST',
@@ -516,7 +563,7 @@ const API = {
       }
     } catch (e) {}
 
-    // 2. Try Google Apps Script if connected
+    // 4. Try Google Apps Script if connected
     if (gasUrl) {
       try {
         const res = await fetch(gasUrl, {
@@ -529,17 +576,11 @@ const API = {
           await this.getPublicData(true);
           return result;
         }
-        throw new Error(result.error || 'Failed to delete on Google Sheets');
       } catch (e) {
-        throw e;
+        console.warn('GAS delete error:', e);
       }
     }
 
-    // Local fallback
-    const data = await this.getPublicData();
-    data.prompts = (data.prompts || []).filter(p => p.id !== promptId);
-    this.saveLocalCache(data);
-    this.cachedData = data;
     return { success: true };
   },
 

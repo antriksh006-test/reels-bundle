@@ -399,11 +399,25 @@ const AdminApp = {
         const id = btn.dataset.id;
         if (!confirm('Are you sure you want to permanently delete this prompt?')) return;
         try {
+          btn.disabled = true;
+          btn.textContent = 'Deleting...';
           await API.deletePrompt(id);
-          window.showToast('Prompt deleted successfully');
-          this.loadDashboardData();
+
+          // Instantly remove row and card from DOM
+          const row = btn.closest('tr');
+          if (row) row.remove();
+          const card = document.querySelector(`.admin-prompt-card[data-id="${id}"]`);
+          if (card) card.remove();
+
+          // Update in-memory prompt list & metrics immediately
+          this.allPrompts = this.allPrompts.filter(p => p.id !== id && p.slug !== id);
+          this.renderOverviewMetrics();
+
+          window.showToast('Prompt deleted successfully', 'success');
         } catch (err) {
           window.showToast('Delete failed: ' + err.message, 'info');
+          btn.disabled = false;
+          btn.textContent = 'Delete';
         }
       });
     });

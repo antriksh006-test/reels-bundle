@@ -777,6 +777,22 @@ function initBackToTop() {
 
 // Auto Initialize
 document.addEventListener('DOMContentLoaded', () => {
+  // Prune any deleted prompts from pre-rendered HTML on client
+  try {
+    const rawDeleted = localStorage.getItem('promptforge_deleted_prompts');
+    if (rawDeleted) {
+      const delArr = JSON.parse(rawDeleted);
+      if (Array.isArray(delArr)) {
+        delArr.forEach(id => {
+          document.querySelectorAll(`article[data-id="${id}"], [href*="/prompt/${id}/"]`).forEach(el => {
+            const card = el.closest('.prompt-masonry-card') || el;
+            card.remove();
+          });
+        });
+      }
+    }
+  } catch (e) {}
+
   initTheme();
   initCopyDelegation();
   if (document.getElementById('masonry-gallery-grid')) {

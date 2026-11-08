@@ -146,18 +146,28 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
-      const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-      const db = JSON.parse(raw);
-      const target = (db.prompts || []).find(p => p.id === promptId);
-      db.prompts = (db.prompts || []).filter(p => p.id !== promptId);
-      fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2), 'utf-8');
-
-      // Remove page folder if exists
-      if (target && target.slug) {
-        const pDir = path.join(PUBLIC_DIR, 'prompt', target.slug);
-        if (fs.existsSync(pDir)) {
-          fs.rmSync(pDir, { recursive: true, force: true });
+      const dataFiles = [
+        path.join(__dirname, 'data', 'initial-data.json'),
+        path.join(__dirname, 'public', 'data', 'initial-data.json')
+      ];
+      let target = null;
+      for (const df of dataFiles) {
+        if (fs.existsSync(df)) {
+          const db = JSON.parse(fs.readFileSync(df, 'utf-8'));
+          if (!target) target = (db.prompts || []).find(p => p.id === promptId || p.slug === promptId);
+          db.prompts = (db.prompts || []).filter(p => p.id !== promptId && p.slug !== promptId);
+          fs.writeFileSync(df, JSON.stringify(db, null, 2), 'utf-8');
         }
+      }
+
+      // Remove page folder if exists across root and public
+      if (target && target.slug) {
+        [
+          path.join(__dirname, 'prompt', target.slug),
+          path.join(__dirname, 'public', 'prompt', target.slug)
+        ].forEach(pDir => {
+          if (fs.existsSync(pDir)) fs.rmSync(pDir, { recursive: true, force: true });
+        });
       }
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
