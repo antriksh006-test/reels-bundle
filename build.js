@@ -98,7 +98,7 @@ function renderPromptCard(p, index = 0) {
  * - The prompt title is used as the prompt page name (slug) and page title
  * - The page description is used as the meta description
  */
-function renderPromptPage(p, allPrompts = [], baseUrl = 'https://promptforge.dev') {
+function renderPromptPage(p, allPrompts = [], baseUrl = 'https://reels-bundle.vercel.app') {
   if (!promptTemplateCache) {
     promptTemplateCache = fs.readFileSync(PROMPT_TEMPLATE_FILE, 'utf-8');
   }
@@ -167,7 +167,7 @@ function renderPromptPage(p, allPrompts = [], baseUrl = 'https://promptforge.dev
  */
 function generateSitemapXml(db) {
   const siteSettings = db.site_settings || {};
-  const baseUrl = (siteSettings.site_url || 'https://promptforge.dev').replace(/\/+$/, '');
+  const baseUrl = (siteSettings.site_url || 'https://reels-bundle.vercel.app').replace(/\/+$/, '');
   const today = new Date().toISOString().split('T')[0];
 
   const publishedPrompts = (db.prompts || []).filter(p => String(p.status).toLowerCase() === 'published');
@@ -239,7 +239,7 @@ function saveAndRenderPrompt(promptData) {
   promptData.short_description = pageDescription;
   promptData.seo_description = pageDescription;
   promptData.seo_title = promptData.seo_title || `${title} | PromptForge`;
-  promptData.canonical_url = `https://promptforge.dev/prompt/${slug}/`;
+  promptData.canonical_url = `https://reels-bundle.vercel.app/prompt/${slug}/`;
   promptData.status = promptData.status || 'published';
 
   const now = new Date().toISOString();
@@ -266,7 +266,7 @@ function saveAndRenderPrompt(promptData) {
   }
 
   // Immediately render and write the prompt's own permanent page: /prompt/<slug>/index.html
-  const baseUrl = (db.site_settings?.site_url || 'https://promptforge.dev').replace(/\/+$/, '');
+  const baseUrl = (db.site_settings?.site_url || 'https://reels-bundle.vercel.app').replace(/\/+$/, '');
   const renderedHtml = renderPromptPage(promptData, prompts, baseUrl);
 
   const targets = [path.join(ROOT_DIR, 'prompt', slug)];
@@ -306,7 +306,7 @@ function saveAndRenderPromptBatch(items = []) {
   const rawData = fs.readFileSync(DATA_FILE, 'utf-8');
   const db = JSON.parse(rawData);
   const prompts = db.prompts || [];
-  const baseUrl = (db.site_settings?.site_url || 'https://promptforge.dev').replace(/\/+$/, '');
+  const baseUrl = (db.site_settings?.site_url || 'https://reels-bundle.vercel.app').replace(/\/+$/, '');
   const now = new Date().toISOString();
   const results = [];
 
@@ -392,7 +392,7 @@ async function build() {
   const db = JSON.parse(rawData);
 
   const siteSettings = db.site_settings || {};
-  const baseUrl = (siteSettings.site_url || 'https://promptforge.dev').replace(/\/+$/, '');
+  const baseUrl = (siteSettings.site_url || 'https://reels-bundle.vercel.app').replace(/\/+$/, '');
   const allPrompts = db.prompts || [];
   const publishedPrompts = allPrompts.filter(p => String(p.status).toLowerCase() === 'published');
   const allCategories = db.categories || [];

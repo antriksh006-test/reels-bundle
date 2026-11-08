@@ -4,5 +4,5 @@ Disallow: /admin/
 Disallow: /backend/
 Disallow: /data/
 
-Sitemap: https://promptforge.dev/sitemap.xml
+Sitemap: https://reels-bundle.vercel.app/sitemap.xml
 
