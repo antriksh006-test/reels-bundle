@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 340" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E1E2E" />
+      <stop offset="100%" stop-color="#0F0F17" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366F1" />
+      <stop offset="100%" stop-color="#A855F7" />
+    </linearGradient>
+  </defs>
+  <rect width="600" height="340" rx="16" fill="url(#bg)"/>
+  <circle cx="500" cy="80" r="140" fill="#6366F1" opacity="0.12" filter="blur(40px)"/>
+  <circle cx="100" cy="260" r="120" fill="#A855F7" opacity="0.1" filter="blur(40px)"/>
+  
+  <rect x="40" y="40" width="520" height="260" rx="12" fill="#181825" stroke="#313244" stroke-width="1.5"/>
+  <circle cx="68" cy="65" r="5" fill="#F38BA8"/>
+  <circle cx="86" cy="65" r="5" fill="#F9E2AF"/>
+  <circle cx="104" cy="65" r="5" fill="#A6E3A1"/>
+  
+  <rect x="68" y="100" width="120" height="28" rx="6" fill="url(#accent)"/>
+  <text x="78" y="119" fill="#FFFFFF" font-family="sans-serif" font-size="12" font-weight="700">PROMPT TEMPLATE</text>
+  
+  <text x="68" y="170" fill="#CDD6F4" font-family="sans-serif" font-size="20" font-weight="700">Production AI Prompt</text>
+  <text x="68" y="200" fill="#9399B2" font-family="sans-serif" font-size="14">Curated, tested, and optimized for maximum LLM performance.</text>
+  
+  <rect x="68" y="235" width="220" height="36" rx="8" fill="#313244"/>
+  <text x="88" y="258" fill="#A6ADC8" font-family="monospace" font-size="13">> Copy &amp; execute in ChatGPT</text>
+</svg>

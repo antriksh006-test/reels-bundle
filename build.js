@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT_DIR = __dirname;
+const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
 const DATA_FILE = path.join(ROOT_DIR, 'data', 'initial-data.json');
 const PROMPT_TEMPLATE_FILE = path.join(ROOT_DIR, 'templates', 'prompt-template.html');
 const CAT_TEMPLATE_FILE = path.join(ROOT_DIR, 'templates', 'category-template.html');
@@ -201,6 +202,8 @@ function generateSitemapXml(db) {
   xml += '</urlset>';
 
   fs.writeFileSync(path.join(ROOT_DIR, 'sitemap.xml'), xml);
+  if (!fs.existsSync(PUBLIC_DIR)) fs.mkdirSync(PUBLIC_DIR, { recursive: true });
+  fs.writeFileSync(path.join(PUBLIC_DIR, 'sitemap.xml'), xml);
   return xml;
 }
 
@@ -255,21 +258,28 @@ function saveAndRenderPrompt(promptData) {
   db.prompts = prompts;
 
   // Write updated database
-  fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2), 'utf-8');
-
-  // Immediately render and write the prompt's own permanent page: /prompt/<slug>/index.html
-  const promptDir = path.join(ROOT_DIR, 'prompt', slug);
-  if (!fs.existsSync(promptDir)) {
-    fs.mkdirSync(promptDir, { recursive: true });
+  const dbJson = JSON.stringify(db, null, 2);
+  fs.writeFileSync(DATA_FILE, dbJson, 'utf-8');
+  const pubDataFile = path.join(PUBLIC_DIR, 'data', 'initial-data.json');
+  if (fs.existsSync(path.dirname(pubDataFile))) {
+    fs.writeFileSync(pubDataFile, dbJson, 'utf-8');
   }
 
+  // Immediately render and write the prompt's own permanent page: /prompt/<slug>/index.html
   const baseUrl = (db.site_settings?.site_url || 'https://promptforge.dev').replace(/\/+$/, '');
   const renderedHtml = renderPromptPage(promptData, prompts, baseUrl);
-  const promptFilePath = path.join(promptDir, 'index.html');
-  fs.writeFileSync(promptFilePath, renderedHtml, 'utf-8');
+
+  const targets = [path.join(ROOT_DIR, 'prompt', slug)];
+  if (fs.existsSync(PUBLIC_DIR)) targets.push(path.join(PUBLIC_DIR, 'prompt', slug));
+  for (const pDir of targets) {
+    if (!fs.existsSync(pDir)) fs.mkdirSync(pDir, { recursive: true });
+    fs.writeFileSync(path.join(pDir, 'index.html'), renderedHtml, 'utf-8');
+  }
 
   // Update sitemap.xml
   generateSitemapXml(db);
+
+  const promptFilePath = path.join(ROOT_DIR, 'prompt', slug, 'index.html');
 
   return {
     success: true,
@@ -390,46 +400,47 @@ async function build() {
 
   catTemplateCache = fs.readFileSync(CAT_TEMPLATE_FILE, 'utf-8');
 
-  // Clean up stale pre-rendered folders
-  if (fs.existsSync(path.join(ROOT_DIR, 'prompt'))) {
-    const validPrompts = new Set(publishedPrompts.map(p => p.slug));
-    fs.readdirSync(path.join(ROOT_DIR, 'prompt')).forEach(dir => {
-      if (!validPrompts.has(dir)) {
-        fs.rmSync(path.join(ROOT_DIR, 'prompt', dir), { recursive: true, force: true });
-      }
-    });
-  }
-  if (fs.existsSync(path.join(ROOT_DIR, 'category'))) {
-    const validCats = new Set(publishedCategories.map(c => c.slug));
-    fs.readdirSync(path.join(ROOT_DIR, 'category')).forEach(dir => {
-      if (!validCats.has(dir)) {
-        fs.rmSync(path.join(ROOT_DIR, 'category', dir), { recursive: true, force: true });
-      }
-    });
-  }
+  // Clean up stale pre-rendered folders across ROOT_DIR and PUBLIC_DIR
+  const outputBases = [ROOT_DIR];
+  if (fs.existsSync(PUBLIC_DIR)) outputBases.push(PUBLIC_DIR);
+
+  outputBases.forEach(base => {
+    if (fs.existsSync(path.join(base, 'prompt'))) {
+      const validPrompts = new Set(publishedPrompts.map(p => p.slug));
+      fs.readdirSync(path.join(base, 'prompt')).forEach(dir => {
+        if (!validPrompts.has(dir)) {
+          fs.rmSync(path.join(base, 'prompt', dir), { recursive: true, force: true });
+        }
+      });
+    }
+    if (fs.existsSync(path.join(base, 'category'))) {
+      const validCats = new Set(publishedCategories.map(c => c.slug));
+      fs.readdirSync(path.join(base, 'category')).forEach(dir => {
+        if (!validCats.has(dir)) {
+          fs.rmSync(path.join(base, 'category', dir), { recursive: true, force: true });
+        }
+      });
+    }
+  });
 
   // 1. Generate Individual Prompt HTML Pages
   console.log(`Generating permanent HTML pages for ${publishedPrompts.length} published prompts...`);
   
   publishedPrompts.forEach(p => {
-    const promptDir = path.join(ROOT_DIR, 'prompt', p.slug);
-    if (!fs.existsSync(promptDir)) {
-      fs.mkdirSync(promptDir, { recursive: true });
-    }
-
     const rendered = renderPromptPage(p, publishedPrompts, baseUrl);
-    fs.writeFileSync(path.join(promptDir, 'index.html'), rendered);
+    outputBases.forEach(base => {
+      const promptDir = path.join(base, 'prompt', p.slug);
+      if (!fs.existsSync(promptDir)) {
+        fs.mkdirSync(promptDir, { recursive: true });
+      }
+      fs.writeFileSync(path.join(promptDir, 'index.html'), rendered);
+    });
   });
 
   // 2. Generate Category Landing Pages
   console.log(`Generating permanent HTML pages for ${publishedCategories.length} categories...`);
 
   publishedCategories.forEach(c => {
-    const catDir = path.join(ROOT_DIR, 'category', c.slug);
-    if (!fs.existsSync(catDir)) {
-      fs.mkdirSync(catDir, { recursive: true });
-    }
-
     const canonicalUrl = `${baseUrl}/category/${c.slug}/`;
     const catName = c.name || c.category_name || '';
     const catPrompts = publishedPrompts.filter(p => String(p.category || '').toLowerCase() === catName.toLowerCase());
@@ -452,59 +463,75 @@ async function build() {
       .replace(/{{DESCRIPTION}}/g, escapeHtml(c.description || ''))
       .replace(/{{PROMPTS_GRID_HTML}}/g, gridHtml);
 
-    fs.writeFileSync(path.join(catDir, 'index.html'), rendered);
+    outputBases.forEach(base => {
+      const catDir = path.join(base, 'category', c.slug);
+      if (!fs.existsSync(catDir)) {
+        fs.mkdirSync(catDir, { recursive: true });
+      }
+      fs.writeFileSync(path.join(catDir, 'index.html'), rendered);
+    });
   });
 
   // 3. Pre-render initial cards into index.html for instant First Contentful Paint (<100ms)
   console.log('Pre-rendering initial 12 cards directly into index.html...');
-  const indexHtmlPath = path.join(ROOT_DIR, 'index.html');
-  if (fs.existsSync(indexHtmlPath)) {
-    let indexHtml = fs.readFileSync(indexHtmlPath, 'utf-8');
-    const initialBatch = publishedPrompts.slice(0, 12);
-    const initialCardsHtml = initialBatch.map((p, idx) => renderPromptCard(p, idx)).join('\n');
-    
-    const regex = /(<div\s+class="masonry-container"\s+id="masonry-gallery-grid">)[\s\S]*?(<\/div>\s*<\/main>)/;
-    if (regex.test(indexHtml)) {
-      indexHtml = indexHtml.replace(regex, `$1\n${initialCardsHtml}\n    $2`);
-      fs.writeFileSync(indexHtmlPath, indexHtml, 'utf-8');
-      console.log('✅ Injected 12 pre-rendered cards into index.html');
+  const initialBatch = publishedPrompts.slice(0, 12);
+  const initialCardsHtml = initialBatch.map((p, idx) => renderPromptCard(p, idx)).join('\n');
+  const regex = /(<div\s+class="masonry-container"\s+id="masonry-gallery-grid">)[\s\S]*?(<\/div>\s*<\/main>)/;
+
+  outputBases.forEach(base => {
+    const indexHtmlPath = path.join(base, 'index.html');
+    if (fs.existsSync(indexHtmlPath)) {
+      let indexHtml = fs.readFileSync(indexHtmlPath, 'utf-8');
+      if (regex.test(indexHtml)) {
+        indexHtml = indexHtml.replace(regex, `$1\n${initialCardsHtml}\n    $2`);
+        fs.writeFileSync(indexHtmlPath, indexHtml, 'utf-8');
+      }
     }
-  }
+  });
+  console.log('✅ Injected 12 pre-rendered cards into index.html');
 
   // Pre-render categories directly into categories.html
-  const categoriesHtmlPath = path.join(ROOT_DIR, 'categories.html');
-  if (fs.existsSync(categoriesHtmlPath)) {
-    let catPageHtml = fs.readFileSync(categoriesHtmlPath, 'utf-8');
-    const catCardsHtml = publishedCategories.map(cat => {
-      const catName = cat.name || cat.category_name || '';
-      const catPrompts = publishedPrompts.filter(p => String(p.category || '').toLowerCase() === catName.toLowerCase());
-      const count = catPrompts.length;
-      const girlsPrompt = catPrompts.find(p => /\bgirl\b|\bgirls\b|\bwoman\b|\bfemale\b|\bsaree\b|\blady\b/i.test(p.title + ' ' + (p.tags || '')));
-      const fallbackPrompt = girlsPrompt || catPrompts[0];
-      const catImg = cat.image || (fallbackPrompt ? fallbackPrompt.featured_image : '/assets/images/default-prompt.svg');
-      const targetUrl = cat.slug ? `/category/${cat.slug}/` : `/prompts.html?cat=${encodeURIComponent(catName)}`;
-      return `
-        <a href="${targetUrl}" class="category-library-card">
-          <div style="display: flex; align-items: center; gap: 1.15rem;">
-            <div class="category-thumb-wrap">
-              <img src="${escapeHtml(catImg)}" alt="${escapeHtml(catName)}" class="category-thumb-img" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='/assets/images/default-prompt.svg';">
-            </div>
-            <div>
-              <h3 style="font-size: 1.05rem; font-weight: 700; color: #FFFFFF; margin-bottom: 0.25rem;">${escapeHtml(catName)}</h3>
-              <span style="font-size: 0.8rem; color: var(--text-muted);">${count} Prompts</span>
-            </div>
+  const catCardsHtml = publishedCategories.map(cat => {
+    const catName = cat.name || cat.category_name || '';
+    const catPrompts = publishedPrompts.filter(p => String(p.category || '').toLowerCase() === catName.toLowerCase());
+    const count = catPrompts.length;
+    const girlsPrompt = catPrompts.find(p => /\bgirl\b|\bgirls\b|\bwoman\b|\bfemale\b|\bsaree\b|\blady\b/i.test(p.title + ' ' + (p.tags || '')));
+    const fallbackPrompt = girlsPrompt || catPrompts[0];
+    const catImg = cat.image || (fallbackPrompt ? fallbackPrompt.featured_image : '/assets/images/default-prompt.svg');
+    const targetUrl = cat.slug ? `/category/${cat.slug}/` : `/prompts.html?cat=${encodeURIComponent(catName)}`;
+    return `
+      <a href="${targetUrl}" class="category-library-card">
+        <div style="display: flex; align-items: center; gap: 1.15rem;">
+          <div class="category-thumb-wrap">
+            <img src="${escapeHtml(catImg)}" alt="${escapeHtml(catName)}" class="category-thumb-img" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='/assets/images/default-prompt.svg';">
           </div>
-          <span style="color: var(--accent-blue); font-size: 1.25rem; font-weight: 700;">→</span>
-        </a>
-      `;
-    }).join('\n');
+          <div>
+            <h3 style="font-size: 1.05rem; font-weight: 700; color: #FFFFFF; margin-bottom: 0.25rem;">${escapeHtml(catName)}</h3>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">${count} Prompts</span>
+          </div>
+        </div>
+        <span style="color: var(--accent-blue); font-size: 1.25rem; font-weight: 700;">→</span>
+      </a>
+    `;
+  }).join('\n');
 
-    const catGridRegex = /(<div\s+id="all-categories-grid"[^>]*>)[\s\S]*?(<\/div>\s*<\/main>)/;
-    if (catGridRegex.test(catPageHtml)) {
-      catPageHtml = catPageHtml.replace(catGridRegex, `$1\n${catCardsHtml}\n    $2`);
-      fs.writeFileSync(categoriesHtmlPath, catPageHtml, 'utf-8');
-      console.log('✅ Injected 9 pre-rendered category cards into categories.html');
+  const catGridRegex = /(<div\s+id="all-categories-grid"[^>]*>)[\s\S]*?(<\/div>\s*<\/main>)/;
+  outputBases.forEach(base => {
+    const categoriesHtmlPath = path.join(base, 'categories.html');
+    if (fs.existsSync(categoriesHtmlPath)) {
+      let catPageHtml = fs.readFileSync(categoriesHtmlPath, 'utf-8');
+      if (catGridRegex.test(catPageHtml)) {
+        catPageHtml = catPageHtml.replace(catGridRegex, `$1\n${catCardsHtml}\n    $2`);
+        fs.writeFileSync(categoriesHtmlPath, catPageHtml, 'utf-8');
+      }
     }
+  });
+  console.log('✅ Injected 9 pre-rendered category cards into categories.html');
+
+  // Copy initial-data.json to public/data/ if public exists
+  const pubDataFile = path.join(PUBLIC_DIR, 'data', 'initial-data.json');
+  if (fs.existsSync(path.dirname(pubDataFile))) {
+    fs.writeFileSync(pubDataFile, JSON.stringify(db, null, 2), 'utf-8');
   }
 
   // 4. Generate production sitemap.xml

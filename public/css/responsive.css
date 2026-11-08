@@ -1,0 +1,439 @@
+/* ==========================================================================
+   PromptForge - Mobile-First & Phone Optimization
+   Enhanced for 360px, 390px, 414px, 480px, 768px, and 1024px Viewports
+   Complies with Apple Touch Guidelines & Google Mobile-First Indexing
+   ========================================================================== */
+
+/* ─── Global Touch & Accessibility Enhancements ─────────────────────────── */
+button, a, input, select, textarea, .cat-pill-item, .library-item-row {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Ensure inputs never trigger iOS auto-zoom on mobile by enforcing 16px minimum */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="search"],
+  input[type="email"],
+  input[type="password"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* ─── Tablet Breakpoint (max-width: 960px) ───────────────────────────────── */
+@media (max-width: 960px) {
+  .site-header {
+    top: 10px;
+    padding: 0 0.85rem;
+  }
+
+  .nav-pill-wrap {
+    padding: 0.45rem 0.85rem 0.45rem 0.55rem;
+  }
+
+  .header-search-pill {
+    margin: 0 0.75rem;
+    max-width: 320px;
+  }
+  .header-search-kbd {
+    display: none;
+  }
+
+  .hero-section-premium {
+    padding: 2.75rem 1rem 1.5rem;
+  }
+
+  .hero-main-title {
+    font-size: 2.5rem;
+  }
+  .hero-gradient-line {
+    font-size: 2.25rem;
+  }
+
+  .masonry-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    align-items: stretch;
+  }
+
+  .footer-rounded-card {
+    padding: 2.5rem 1.5rem 2rem;
+  }
+}
+
+/* ─── Mobile Devices (max-width: 640px) ──────────────────────────────────── */
+@media (max-width: 640px) {
+  /* Safe Area Aware Sticky Header */
+  .site-header {
+    top: max(8px, env(safe-area-inset-top));
+    padding: 0 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .nav-pill-wrap {
+    padding: 0.35rem 0.6rem 0.35rem 0.45rem;
+    height: 52px;
+  }
+
+  .brand-circle-white {
+    width: 36px;
+    height: 36px;
+  }
+  .brand-circle-letter {
+    font-size: 1.2rem;
+  }
+  .brand-name-pill {
+    font-size: 1.05rem;
+    letter-spacing: -0.01em;
+  }
+
+  .header-search-pill {
+    margin: 0 0.45rem;
+    max-width: none;
+    flex: 1;
+    min-width: 0;
+  }
+  .header-search-input-wrap {
+    padding: 0.32rem 0.55rem 0.32rem 1.85rem;
+    height: 36px;
+  }
+  .header-search-icon-inside {
+    left: 8px;
+  }
+  .header-search-icon-inside svg {
+    width: 13px;
+    height: 13px;
+  }
+  .header-search-input {
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 480px) {
+    .brand-name-pill {
+      display: none;
+    }
+  }
+
+  /* 44px Minimum Touch Hit Area for Mobile Buttons */
+  .header-circle-actions {
+    gap: 0.35rem;
+  }
+
+  .circle-nav-btn {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+  }
+  .circle-nav-btn svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .btn-admin-link {
+    display: none; /* Hide in compact phone navbar */
+  }
+
+  /* Hero Section */
+  .hero-section-premium {
+    padding: 1.5rem 0.75rem 0.75rem;
+  }
+
+  .hero-main-title {
+    font-size: 1.85rem;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+  .hero-gradient-line {
+    font-size: 1.75rem;
+    margin-bottom: 0.65rem;
+  }
+
+  .hero-subtext-wrap {
+    font-size: 0.85rem;
+    line-height: 1.45;
+    margin-bottom: 1.25rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .badge-tools-pill {
+    font-size: 0.78rem;
+    padding: 0.25rem 0.75rem;
+  }
+
+  /* Full-Width Search Input on Phone */
+  .hero-search-pill-box {
+    margin-bottom: 1rem;
+    max-width: 100%;
+  }
+
+  .search-pill-inner {
+    padding: 0.3rem 0.35rem 0.3rem 1.1rem;
+    border-radius: var(--radius-full);
+  }
+
+  .search-pill-input {
+    font-size: 16px !important; /* Prevents iOS auto-zoom */
+    padding: 0.4rem 0;
+  }
+
+  .search-circle-blue-btn {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+  .search-circle-blue-btn svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  /* Popular Tags Row (Scrollable or Clean Wrap) */
+  .popular-tags-row {
+    font-size: 0.82rem;
+    gap: 0.35rem 0.45rem;
+    padding: 0 0.25rem;
+  }
+  .popular-divider {
+    font-size: 0.75rem;
+  }
+
+  /* Category Nav Pill Switcher (Horizontal Momentum Scroll) */
+  .category-nav-bar {
+    margin: 1.25rem auto 1.5rem;
+    padding: 0 0.5rem;
+    max-width: 100%;
+  }
+
+  .category-nav-pill-box {
+    justify-content: flex-start;
+    padding: 0.3rem 0.35rem;
+    gap: 0.4rem;
+    -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+  }
+
+  .cat-pill-item {
+    padding: 0.5rem 0.95rem;
+    font-size: 0.82rem;
+    min-height: 38px;
+  }
+
+  /* 2-Column Pinterest Masonry on Phones (Screenshot 2 Match) */
+  .gallery-section-wrap {
+    padding: 0 0.5rem 4rem;
+  }
+
+  .masonry-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+
+  .prompt-masonry-card {
+    margin-bottom: 0;
+    border-radius: 18px;
+    height: 100%;
+  }
+
+  .card-top-left-badges {
+    top: 8px;
+    left: 8px;
+    gap: 0.25rem;
+  }
+  .card-top-right-badges {
+    top: 8px;
+    right: 8px;
+    gap: 0.25rem;
+  }
+
+  .badge-photo-count,
+  .badge-new-glow,
+  .badge-cat-tag {
+    font-size: 0.66rem;
+    font-weight: 700;
+    padding: 0.18rem 0.45rem;
+  }
+
+  .badge-crown-gold {
+    width: 24px;
+    height: 24px;
+  }
+  .badge-crown-gold svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .card-bottom-info {
+    padding: 0.7rem 0.75rem 0.85rem;
+  }
+
+  .card-title-text {
+    font-size: 0.82rem;
+    line-height: 1.3;
+    margin-bottom: 0.3rem;
+  }
+
+  .card-desc-snippet {
+    display: none; /* Keep phone cards visual and clean like Pinterest */
+  }
+
+  .card-action-row {
+    padding-top: 0.45rem;
+  }
+
+  /* Touch-friendly Copy Button */
+  .btn-card-copy {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+    min-height: 32px;
+  }
+
+  .btn-card-view {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.25rem;
+  }
+
+  /* Full-Screen Search Modal on Mobile (Screenshot 4) */
+  .search-fullscreen-overlay {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .search-modal-card {
+    border-radius: 0;
+    max-width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: max(1.25rem, env(safe-area-inset-top)) 1rem max(1.5rem, env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    border: none;
+  }
+
+  .search-modal-header {
+    margin-bottom: 1rem;
+    padding: 0.4rem 0.5rem 0.4rem 1rem;
+    height: 50px;
+  }
+
+  .search-modal-input {
+    font-size: 16px !important;
+  }
+
+  .search-modal-close-circle {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .libraries-list {
+    flex: 1;
+    max-height: none;
+  }
+
+  .library-item-row {
+    padding: 0.75rem 0.85rem;
+    min-height: 52px; /* Thumb-friendly tap size */
+  }
+
+  /* Detail / Prompt Pages on Phone */
+  .prompt-detail-wrap {
+    padding: 0 0.75rem 3rem;
+  }
+
+  .prompt-page-title {
+    font-size: 1.5rem;
+  }
+
+  .prompt-box-card {
+    padding: 1rem;
+  }
+
+  /* Make copy prompt button full width and thumb-friendly on mobile */
+  #master-copy-prompt-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    min-height: 48px;
+    margin-top: 0.5rem;
+  }
+
+  /* Rounded Bordered Footer */
+  .site-footer-premium {
+    margin: 2.5rem 0.5rem max(1.5rem, env(safe-area-inset-bottom));
+  }
+
+  .footer-rounded-card {
+    border-radius: 20px;
+    padding: 2rem 1rem 1.75rem;
+  }
+
+  .footer-social-row {
+    gap: 0.5rem;
+    margin: 1.25rem 0 1.5rem;
+  }
+
+  .social-circle-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .quick-links-wrap {
+    gap: 0.75rem 1rem;
+    font-size: 0.82rem;
+  }
+
+  /* Floating Dock on Mobile - Unobtrusive and Safe-Area Adjusted */
+  .floating-actions-dock {
+    bottom: max(16px, env(safe-area-inset-bottom));
+    right: 14px;
+    gap: 0.5rem;
+  }
+
+  .floating-pill-app {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.72rem;
+  }
+
+  .floating-circle-top {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+}
+
+/* ─── Ultra-Compact Phones (max-width: 375px) ────────────────────────────── */
+@media (max-width: 375px) {
+  .site-header {
+    padding: 0 0.35rem;
+  }
+  .nav-pill-wrap {
+    padding: 0.3rem 0.45rem;
+  }
+  .brand-name-pill {
+    font-size: 0.95rem;
+  }
+  .hero-main-title {
+    font-size: 1.65rem;
+  }
+  .hero-gradient-line {
+    font-size: 1.55rem;
+  }
+  .masonry-container {
+    gap: 0.5rem;
+  }
+  .prompt-masonry-card {
+    margin-bottom: 0;
+  }
+}

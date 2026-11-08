@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /backend/
+Disallow: /data/
+
+Sitemap: https://promptforge.dev/sitemap.xml
+

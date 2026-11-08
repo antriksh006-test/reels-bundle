@@ -9,7 +9,7 @@ const path = require('path');
 const { saveAndRenderPrompt, saveAndRenderPromptBatch, renderPromptPage, generateSlug, build } = require('./build.js');
 
 const PORT = process.env.PORT || 3000;
-const PUBLIC_DIR = __dirname;
+const PUBLIC_DIR = fs.existsSync(path.join(__dirname, 'public')) ? path.join(__dirname, 'public') : __dirname;
 const DATA_FILE = path.join(PUBLIC_DIR, 'data', 'initial-data.json');
 
 const MIME_TYPES = {
