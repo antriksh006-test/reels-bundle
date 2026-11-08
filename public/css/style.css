@@ -1756,7 +1756,7 @@ pre {
 
 .ad-slot-container.ad-bottom-slot {
   margin-top: 3.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 .ad-slot-container.ad-sidebar-slot {
@@ -1785,61 +1785,56 @@ pre {
   background: rgba(100, 116, 139, 0.4);
 }
 
+/* Responsive Viewport Controls for Adsterra Banners */
+.ad-banner-desktop {
+  display: block;
+}
+.ad-banner-tablet {
+  display: none;
+}
+.ad-banner-mobile {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .ad-banner-desktop { display: block !important; }
+  .ad-banner-tablet { display: none !important; }
+  .ad-banner-mobile { display: none !important; }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .ad-banner-desktop { display: none !important; }
+  .ad-banner-tablet { display: block !important; }
+  .ad-banner-mobile { display: none !important; }
+}
+
+@media (max-width: 480px) {
+  .ad-banner-desktop { display: none !important; }
+  .ad-banner-tablet { display: none !important; }
+  .ad-banner-mobile { display: block !important; }
+}
+
 /* 728x90 Desktop Leaderboard / 468x60 Tablet / 320x50 Mobile */
 .ad-banner-frame-leaderboard {
-  width: 728px;
-  min-height: 90px;
+  min-height: 50px;
   max-width: 100%;
-  background: rgba(14, 18, 30, 0.65);
-  border: 1px dashed rgba(99, 102, 241, 0.3);
-  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  overflow: visible;
   transition: all 0.2s ease;
 }
 
-.ad-banner-frame-leaderboard:hover {
-  border-color: rgba(99, 102, 241, 0.6);
-  background: rgba(20, 24, 40, 0.75);
-}
-
-@media (max-width: 768px) {
-  .ad-banner-frame-leaderboard {
-    width: 468px;
-    min-height: 60px;
-  }
-}
-
-@media (max-width: 500px) {
-  .ad-banner-frame-leaderboard {
-    width: 320px;
-    min-height: 50px;
-  }
-}
-
-/* 300x250 Medium Rectangle (In-Feed & Sidebar) */
+/* 300x250 Medium Rectangle (In-Feed & Bottom) */
 .ad-banner-frame-rectangle {
   width: 300px;
   min-height: 250px;
   max-width: 100%;
-  background: rgba(14, 18, 30, 0.65);
-  border: 1px dashed rgba(99, 102, 241, 0.3);
-  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  transition: all 0.2s ease;
+  overflow: visible;
   margin: 1.25rem auto;
-}
-
-.ad-banner-frame-rectangle:hover {
-  border-color: rgba(99, 102, 241, 0.6);
-  background: rgba(20, 24, 40, 0.75);
 }
 
 /* 160x600 & 160x300 Skyscraper */
@@ -1847,46 +1842,26 @@ pre {
   width: 160px;
   min-height: 600px;
   max-width: 100%;
-  background: rgba(14, 18, 30, 0.65);
-  border: 1px dashed rgba(99, 102, 241, 0.3);
-  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
 }
 
-/* Placeholder layout before user injects live scripts */
-.ad-placeholder-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.3rem;
-  padding: 0.65rem;
-  color: #64748B;
-  text-align: center;
+/* Adsterra iframes styling */
+.ad-banner-frame-leaderboard iframe,
+.ad-banner-frame-rectangle iframe,
+.ad-banner-frame-skyscraper iframe {
+  display: block !important;
+  margin: 0 auto !important;
+  border: 0 !important;
+  border-radius: 8px;
+  max-width: 100%;
 }
 
-.ad-placeholder-box .ad-icon-spark {
-  color: #818CF8;
-  font-size: 1.1rem;
-}
-
-.ad-placeholder-box .ad-title-text {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #94A3B8;
-}
-
-.ad-placeholder-box .ad-size-pill {
-  display: inline-block;
-  padding: 0.15rem 0.5rem;
-  background: rgba(99, 102, 241, 0.15);
-  border: 1px solid rgba(99, 102, 241, 0.3);
-  border-radius: 999px;
-  color: #A5B4FC;
-  font-size: 0.7rem;
-  font-weight: 700;
-  font-family: var(--font-mono, monospace);
+.ad-banner-frame-leaderboard.ad-live,
+.ad-banner-frame-rectangle.ad-live {
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
