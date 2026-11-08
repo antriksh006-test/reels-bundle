@@ -3,16 +3,8 @@
   "buildCommand": "node build.js",
   "outputDirectory": "public",
   "cleanUrls": true,
-  "trailingSlash": true,
   "rewrites": [
-    { "source": "/adm/?", "destination": "/admin/index.html" },
-    { "source": "/admin/?", "destination": "/admin/index.html" },
-    { "source": "/prompts/?", "destination": "/prompts.html" },
-    { "source": "/categories/?", "destination": "/categories.html" },
-    { "source": "/about/?", "destination": "/about.html" },
-    { "source": "/contact/?", "destination": "/contact.html" },
-    { "source": "/privacy/?", "destination": "/privacy.html" },
-    { "source": "/terms/?", "destination": "/terms.html" }
+    { "source": "/adm", "destination": "/admin/index.html" },
+    { "source": "/adm/", "destination": "/admin/index.html" }
   ]
 }
-
