@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{SEO_TITLE}}</title>
+  <meta name="description" content="{{SEO_DESCRIPTION}}">
+  <link rel="canonical" href="{{CANONICAL_URL}}">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="alternate icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{CANONICAL_URL}}">
+  <meta property="og:title" content="{{SEO_TITLE}}">
+  <meta property="og:description" content="{{SEO_DESCRIPTION}}">
+  <meta property="og:image" content="https://promptpin.in/promptpin-images/durga-puja-prompt-for-girls.webp">
+
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "{{CATEGORY_NAME}} AI Prompts",
+    "description": "{{SEO_DESCRIPTION}}",
+    "url": "{{CANONICAL_URL}}"
+  }
+  </script>
+</head>
+<body>
+
+  <!-- Sticky Pill Header -->
+  <header class="site-header">
+    <div class="nav-pill-wrap">
+      <a href="/" class="brand-logo-pill" aria-label="PromptForge Home">
+        <img src="/assets/images/logo-icon.svg" alt="PromptForge" class="brand-logo-img">
+        <span class="brand-name-pill">PromptForge</span>
+      </a>
+
+      <!-- Center: Integrated Search Bar -->
+      <div class="header-search-pill" id="header-search-wrap">
+        <div class="header-search-input-wrap">
+          <span class="header-search-icon-inside">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          </span>
+          <input type="text" class="header-search-input" id="header-search-input" placeholder="Search prompts or libraries..." autocomplete="off">
+          <kbd class="header-search-kbd">Ctrl+K</kbd>
+        </div>
+      </div>
+
+      <div class="header-circle-actions">
+        <a href="/" class="circle-nav-btn" title="Back to Home" aria-label="Home">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </a>
+        <button class="circle-nav-btn theme-toggle" title="Toggle Theme" aria-label="Theme">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Category Hero Header -->
+  <section class="hero-section-premium" style="padding: 2.5rem 1rem 1.5rem;">
+    <div class="container">
+      <div style="font-size: 0.8rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-blue); margin-bottom: 0.5rem;">
+        LIBRARY COLLECTION
+      </div>
+      <h1 class="hero-main-title">{{CATEGORY_NAME}} Prompts</h1>
+      <span class="hero-gradient-line" style="font-size: 2.2rem;">Gemini &amp; ChatGPT</span>
+      <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto;">{{DESCRIPTION}}</p>
+    </div>
+  </section>
+
+  <!-- Masonry Gallery for Category Prompts -->
+  <main class="gallery-section-wrap">
+    <div class="masonry-container">
+      {{PROMPTS_GRID_HTML}}
+    </div>
+
+    <!-- Back to all categories CTA -->
+    <div style="text-align: center; margin-top: 3.5rem; padding-top: 2rem; border-top: 1px solid var(--border-subtle);">
+      <a href="/categories.html" class="badge-tools-pill" style="font-size: 0.95rem; padding: 0.5rem 1.5rem;">
+        ← Browse All Libraries
+      </a>
+    </div>
+  </main>
+
+  <!-- Full-Screen Search & Library Modal -->
+  <div class="search-fullscreen-overlay" id="search-fullscreen-modal">
+    <div class="search-modal-card">
+      <div class="search-modal-header">
+        <svg class="search-modal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input type="text" id="modal-library-search-input" class="search-modal-input" placeholder="Search prompts or libraries..." autocomplete="off">
+        <button class="search-modal-close-circle" id="btn-close-search-modal" aria-label="Close">✕</button>
+      </div>
+      <div id="modal-search-live-results" style="display: none; margin-bottom: 1.25rem;"></div>
+      <div class="libraries-section-title">Libraries</div>
+      <div class="libraries-list" id="modal-libraries-list"></div>
+    </div>
+    <button class="search-modal-bottom-close" id="btn-close-search-modal-bottom" aria-label="Close search">✕</button>
+  </div>
+
+  <!-- Rounded Footer -->
+  <footer class="site-footer-premium">
+    <div class="footer-rounded-card">
+      <div class="footer-brand-center">
+        <div class="footer-logo-row">
+          <img src="/assets/images/logo-icon.svg" alt="PromptForge" class="brand-logo-img">
+          <span class="brand-name-pill" style="font-size: 1.35rem;">PromptForge</span>
+        </div>
+        <p class="footer-tagline-text">
+          The premier library for high-fidelity AI photo editing prompts. Optimized for Gemini, ChatGPT, and Midjourney.
+        </p>
+      </div>
+
+      <div class="footer-section-divider"></div>
+
+      <div class="quick-links-wrap">
+        <a href="/" class="quick-link-item">Home</a>
+        <a href="/prompts.html" class="quick-link-item">Explore Prompts</a>
+        <a href="/about.html" class="quick-link-item">About Us</a>
+        <a href="/contact.html" class="quick-link-item">Contact Us</a>
+        <a href="/privacy.html" class="quick-link-item">Privacy Policy</a>
+        <a href="/terms.html" class="quick-link-item">Terms &amp; Conditions</a>
+      </div>
+
+      <div class="footer-copyright">
+        &copy; 2026 PromptForge. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

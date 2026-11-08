@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Admin Dashboard - PromptForge</title>
+  <meta name="description" content="Secure administrative control panel for PromptForge. Manage prompts, categories, and Google Sheets CMS.">
+  <link rel="canonical" href="https://promptforge.dev/admin/">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="alternate icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+
+  <!-- Authentication Gatekeeper Overlay -->
+  <div id="auth-wrapper" class="auth-wrapper">
+    <div class="auth-card">
+      <img src="/assets/images/logo-icon.svg" alt="PromptForge" style="width: 52px; height: 52px; border-radius: 14px; margin-bottom: 1.25rem; box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);">
+      <h2 class="auth-title">Admin Dashboard</h2>
+      <p class="auth-desc">Enter your administrator password to manage prompts, categories, and Google Sheets.</p>
+      
+      <div id="auth-error-msg" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid #EF4444; color: #FCA5A5; padding: 0.65rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem;">
+        Invalid administrator credentials.
+      </div>
+
+      <form id="admin-login-form">
+        <div class="auth-form-group">
+          <label class="auth-label" for="admin-password-input">Master Password</label>
+          <input type="password" id="admin-password-input" class="auth-input" placeholder="Default: admin123" required>
+        </div>
+        <button type="submit" id="admin-login-btn" class="auth-btn">Sign In to Dashboard</button>
+      </form>
+      <div style="margin-top: 1.5rem; font-size: 0.75rem; color: #64748B;">
+        Protected by SHA-256 Session Token &amp; Google Apps Script
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="admin-brand">
+      <img src="/assets/images/logo-icon.svg" alt="PromptForge" style="width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0; box-shadow: 0 2px 10px rgba(99, 102, 241, 0.35);">
+      <span>PromptForge</span>
+    </div>
+
+    <nav class="admin-nav">
+      <div class="admin-nav-item active" data-tab="overview">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Overview</span>
+      </div>
+      <div class="admin-nav-item" data-tab="prompts">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        <span>Prompts</span>
+      </div>
+      <div class="admin-nav-item" data-tab="categories">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Categories</span>
+      </div>
+      <div class="admin-nav-item" data-tab="settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Settings &amp; Sheets</span>
+      </div>
+      <div class="admin-nav-item" data-tab="import">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span>Bulk Import</span>
+      </div>
+    </nav>
+
+    <div class="admin-sidebar-footer">
+      <button id="btn-admin-logout" class="btn-admin-logout">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Sign Out</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Admin Main Content -->
+  <main class="admin-main">
+    <!-- Topbar -->
+    <header class="admin-topbar">
+      <div>
+        <h1 class="admin-page-title">Dashboard Overview</h1>
+        <p style="font-size: 0.85rem; color: #94A3B8; margin-top: 0.2rem;">Manage your live prompt library and sync to Google Sheets.</p>
+      </div>
+
+      <div class="admin-top-actions">
+        <a href="/" target="_blank" class="btn btn-sm btn-secondary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          <span>View Public Site</span>
+        </a>
+        <button id="btn-add-prompt" class="btn btn-sm btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>Add New Prompt</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- TAB 1: OVERVIEW -->
+    <div id="tab-overview" class="admin-tab-pane">
+      <!-- 5 Key Metric Cards -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-card-label">Total Prompts</span>
+          <span id="metric-total-prompts" class="metric-card-value">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-card-label">Published</span>
+          <span id="metric-published-prompts" class="metric-card-value" style="color: #34D399;">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-card-label">Drafts</span>
+          <span id="metric-draft-prompts" class="metric-card-value" style="color: #FBBF24;">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-card-label">Total Page Views</span>
+          <span id="metric-total-views" class="metric-card-value">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-card-label">Total Prompt Copies</span>
+          <span id="metric-total-copies" class="metric-card-value" style="color: #A5B4FC;">0</span>
+        </div>
+        <div class="metric-card" style="cursor: pointer;" onclick="document.querySelector('[data-tab=\'prompts\']').click(); document.getElementById('admin-filter-trending').value='trending'; AdminApp.applyPromptFilter();" title="Click to filter by Trending">
+          <span class="metric-card-label">🔥 Trending Prompts</span>
+          <span id="metric-trending-prompts" class="metric-card-value" style="color: #F87171;">0</span>
+        </div>
+      </div>
+
+      <!-- Quick Action Cards -->
+      <div class="admin-panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Production Status &amp; Deployment</h2>
+        </div>
+        <p style="color: #94A3B8; font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.5;">
+          PromptForge synchronizes with your <strong>Google Sheets CMS</strong> and generates permanent, search-engine-crawlable static HTML files for every prompt.
+        </p>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <a href="/sitemap.xml" target="_blank" class="btn btn-sm btn-secondary">Check sitemap.xml ↗</a>
+          <a href="/robots.txt" target="_blank" class="btn btn-sm btn-secondary">Check robots.txt ↗</a>
+          <button id="btn-generate-static" class="btn btn-sm btn-primary" onclick="AdminApp.triggerStaticBuild(this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span>Generate Static SEO Pages</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: PROMPTS MANAGEMENT -->
+    <div id="tab-prompts" class="admin-tab-pane" style="display: none;">
+      <div class="admin-panel">
+        <div class="panel-header">
+          <div style="display:flex; align-items:center; gap:0.85rem;">
+            <h2 class="panel-title" style="margin:0;">All Prompts</h2>
+            <span id="admin-prompts-count-badge" style="font-size:0.75rem; background:rgba(99,102,241,0.15); color:#818CF8; border:1px solid rgba(99,102,241,0.3); padding:2px 8px; border-radius:12px; font-weight:700;">128 Prompts</span>
+          </div>
+          <div class="admin-toolbar" style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
+            <!-- Category Filter -->
+            <select id="admin-filter-category" class="form-select" style="width:auto; padding:0.4rem 0.8rem; font-size:0.82rem; height:36px;">
+              <option value="all">All Categories</option>
+            </select>
+            <!-- Trending / Status Filter -->
+            <select id="admin-filter-trending" class="form-select" style="width:auto; padding:0.4rem 0.8rem; font-size:0.82rem; height:36px;">
+              <option value="all">All Status</option>
+              <option value="trending">🔥 Trending Only</option>
+              <option value="published">Published Only</option>
+              <option value="draft">Drafts Only</option>
+            </select>
+            <!-- Search -->
+            <input type="text" id="admin-search-prompts" class="admin-search-input" placeholder="Search title, tags, slug..." style="min-width: 200px;">
+            <!-- View Mode Switcher -->
+            <div class="btn-group-toggle" style="display:inline-flex; border:1px solid #23283E; border-radius:8px; overflow:hidden;">
+              <button id="btn-prompts-view-table" class="btn-toggle-view active" type="button" title="Compact Table View">☰ Table</button>
+              <button id="btn-prompts-view-grid" class="btn-toggle-view" type="button" title="Visual Cards View">⊞ Cards</button>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="document.getElementById('btn-add-prompt').click()">+ New Prompt</button>
+          </div>
+        </div>
+
+        <!-- Table View -->
+        <div id="admin-prompts-table-wrap" class="data-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th style="width: 65px; text-align: center; white-space: nowrap;">Preview</th>
+                <th style="min-width: 250px;">Prompt Title & Slug</th>
+                <th style="white-space: nowrap;">Category</th>
+                <th style="white-space: nowrap;">Status</th>
+                <th style="white-space: nowrap;">Views</th>
+                <th style="white-space: nowrap;">Copies</th>
+                <th style="white-space: nowrap;">Updated</th>
+                <th style="text-align: right; min-width: 330px; white-space: nowrap;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-prompts-tbody">
+              <!-- Rendered by admin.js with images -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Visual Grid / Cards View -->
+        <div id="admin-prompts-grid-view" class="admin-prompts-cards-grid" style="display: none;">
+          <!-- Rendered by admin.js with visual cards -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: CATEGORIES MANAGEMENT -->
+    <div id="tab-categories" class="admin-tab-pane" style="display: none;">
+      <div class="admin-panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Categories Management</h2>
+          <button id="btn-add-category" class="btn btn-sm btn-primary">+ Add Category</button>
+        </div>
+
+        <div class="data-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Category Name</th>
+                <th>Slug</th>
+                <th>Description</th>
+                <th>Prompts</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-categories-tbody">
+              <!-- Rendered by admin.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: SETTINGS & GOOGLE SHEETS -->
+    <div id="tab-settings" class="admin-tab-pane" style="display: none;">
+      <div class="admin-panel" style="max-width: 800px;">
+        <div class="panel-header">
+          <h2 class="panel-title">Google Sheets Connection &amp; API Configuration</h2>
+        </div>
+        
+        <form id="site-settings-form">
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label" for="setting-gas-url">Google Apps Script Web App URL</label>
+            <div style="display: flex; gap: 0.5rem;">
+              <input type="url" id="setting-gas-url" class="form-input" style="flex-grow: 1;" placeholder="https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec">
+              <button type="button" id="btn-test-gas-conn" class="btn btn-secondary">Test Connection</button>
+            </div>
+            <span style="font-size: 0.75rem; color: #94A3B8; margin-top: 0.35rem;">Deploy your Apps Script as a Web App (Access: Anyone) and paste the URL here.</span>
+          </div>
+
+          <div class="form-grid-2" style="margin-bottom: 1.25rem;">
+            <div class="form-group">
+              <label class="form-label" for="setting-site-name">Website Name</label>
+              <input type="text" id="setting-site-name" class="form-input" value="PromptForge">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="setting-contact-email">Contact Email</label>
+              <input type="email" id="setting-contact-email" class="form-input" value="hello@promptforge.dev">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label" for="setting-hero-headline">Homepage Headline</label>
+            <input type="text" id="setting-hero-headline" class="form-input">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label" for="setting-hero-subtitle">Homepage Subtitle</label>
+            <textarea id="setting-hero-subtitle" class="form-textarea" style="min-height: 80px;"></textarea>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.75rem;">
+            <label class="form-label" for="setting-announcement">Announcement Bar Text</label>
+            <input type="text" id="setting-announcement" class="form-input">
+          </div>
+
+          <button type="submit" class="btn btn-primary">Save Settings</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- TAB 5: BULK IMPORT - outside main so it overlays correctly -->
+  <div id="tab-import" class="admin-tab-pane" style="display:none; position:fixed; top:0; left:200px; right:0; bottom:0; overflow-y:auto; padding:2rem; background:var(--bg-primary);">
+    <div class="admin-panel" style="max-width:1100px;">
+      <div class="panel-header">
+        <h2 class="panel-title">📥 Bulk Import Prompts</h2>
+      </div>
+
+      <!-- Format Tabs -->
+      <div style="display:flex; gap:0.5rem; margin-bottom:1.5rem;">
+        <button class="btn btn-sm btn-primary" id="import-tab-scraped" onclick="ImportTool.showTab('scraped')">Scraped Text Format</button>
+        <button class="btn btn-sm btn-secondary" id="import-tab-json" onclick="ImportTool.showTab('json')">JSON Format</button>
+      </div>
+
+      <!-- SCRAPED FORMAT PANEL -->
+      <div id="import-panel-scraped">
+        <div style="background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.3); border-radius:10px; padding:1rem 1.25rem; margin-bottom:1.25rem;">
+          <p style="color:#A5B4FC; font-size:0.85rem; font-weight:600; margin-bottom:0.4rem;">✅ Fully Automatic — just paste and import</p>
+          <p style="color:#94A3B8; font-size:0.82rem; line-height:1.6; margin:0;">
+            Title, slug, category, image — everything is auto-detected from the data. Multiple prompts separated by <code style="background:#1e293b;padding:1px 5px;border-radius:4px;">====</code> lines are all imported at once.
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Paste Scraped Data Here</label>
+          <textarea id="import-scraped-input" class="form-textarea code-mode"
+            style="min-height:360px; font-size:0.78rem; line-height:1.5;"
+            placeholder="URL: https://promptpin.in/cinematic/some-prompt/&#10;Title: Anime Flashlight AI Photo Editing Prompt&#10;Description: Short description here.&#10;Image Link: https://example.com/image.webp&#10;Prompt / Details:&#10;Transform the uploaded photo into...&#10;============================================================&#10;URL: https://promptpin.in/portrait/another-prompt/&#10;Title: Another Prompt Title&#10;..."></textarea>
+        </div>
+
+        <div style="display:flex; gap:0.75rem; margin-top:1rem; align-items:center; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="ImportTool.parseScraped()">🔍 Parse &amp; Preview</button>
+          <button class="btn btn-secondary" onclick="ImportTool.parseAndImport()">⚡ Parse &amp; Import Directly</button>
+          <span id="import-scraped-count" style="font-size:0.85rem; color:#94A3B8;"></span>
+        </div>
+      </div>
+
+      <!-- JSON FORMAT PANEL -->
+      <div id="import-panel-json" style="display:none;">
+        <div style="background:#0f172a; border:1px solid #334155; border-radius:8px; padding:1rem; margin-bottom:1rem; font-size:0.78rem; color:#64748B; font-family:var(--font-mono); line-height:1.8;">
+          [{ "title": "...", "prompt_content": "...", "short_description": "...", "category": "...", "featured_image": "...", "tags": "...", "status": "published" }]
+        </div>
+        <div class="form-group">
+          <label class="form-label">Paste JSON Array Here</label>
+          <textarea id="import-json-input" class="form-textarea code-mode"
+            style="min-height:360px; font-size:0.78rem;"
+            placeholder='[{"title":"Example Prompt","short_description":"...","prompt_content":"...","category":"Portrait"}]'></textarea>
+        </div>
+        <div style="display:flex; gap:0.75rem; margin-top:1rem; align-items:center; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="ImportTool.parseJSON()">🔍 Parse &amp; Preview</button>
+          <button class="btn btn-secondary" onclick="ImportTool.parseAndImportJSON()">⚡ Parse &amp; Import Directly</button>
+          <span id="import-json-count" style="font-size:0.85rem; color:#94A3B8;"></span>
+        </div>
+      </div>
+
+      <!-- PROGRESS BAR -->
+      <div id="import-progress-bar" style="display:none; margin-top:1.5rem;">
+        <div style="background:#1e293b; border-radius:8px; height:10px; overflow:hidden;">
+          <div id="import-progress-fill" style="background:linear-gradient(90deg,#6366F1,#8B5CF6); height:100%; width:0%; transition:width 0.4s;"></div>
+        </div>
+        <p id="import-progress-text" style="font-size:0.82rem; color:#94A3B8; margin-top:0.5rem;">Starting...</p>
+      </div>
+
+      <!-- PREVIEW TABLE -->
+      <div id="import-preview-section" style="display:none; margin-top:2rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.75rem;">
+          <h3 style="font-size:1rem; font-weight:700; color:#E2E8F0;">
+            <span id="import-preview-count">0</span> prompts ready to import
+          </h3>
+          <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="ImportTool.clearPreview()">✕ Clear</button>
+            <button class="btn btn-primary" id="btn-do-import" onclick="ImportTool.doImport()">⬆ Import All to Google Sheets</button>
+          </div>
+        </div>
+        <div class="data-table-wrap" style="max-height:400px; overflow-y:auto;">
+          <table class="admin-table" style="font-size:0.79rem;">
+            <thead>
+              <tr>
+                <th style="width:32px;">#</th>
+                <th>Title (from page)</th>
+                <th>Auto Slug</th>
+                <th>Auto Category</th>
+                <th style="width:52px;">Img</th>
+                <th style="width:110px;">Chars</th>
+                <th style="width:60px;">Del</th>
+              </tr>
+            </thead>
+            <tbody id="import-preview-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prompt Add / Edit Modal Editor -->
+  <div id="prompt-editor-modal" class="editor-modal">
+    <div class="editor-dialog">
+      <div class="editor-header">
+        <h3 id="prompt-editor-title" style="font-size: 1.25rem; font-weight: 700;">Add New Prompt</h3>
+        <button id="modal-close-prompt-editor" class="modal-close" style="color: #94A3B8;">&times;</button>
+      </div>
+
+      <form id="prompt-editor-form" style="display: flex; flex-direction: column; overflow: hidden; height: 100%;">
+        <div class="editor-body">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="edit-prompt-title">Prompt Title *</label>
+              <input type="text" id="edit-prompt-title" class="form-input" placeholder="e.g. ChatGPT SEO Blog Writer" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="edit-prompt-slug">URL Slug *</label>
+              <input type="text" id="edit-prompt-slug" class="form-input" placeholder="chatgpt-seo-blog-writer" required>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="edit-prompt-category">Category *</label>
+              <select id="edit-prompt-category" class="form-select" required>
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="edit-prompt-subcategory">Subcategory</label>
+              <input type="text" id="edit-prompt-subcategory" class="form-input" placeholder="e.g. Content Optimization">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="edit-prompt-tags">Tags (Comma-separated)</label>
+              <input type="text" id="edit-prompt-tags" class="form-input" placeholder="seo-optimization, chatgpt-4, copywriting">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="edit-prompt-author">Author</label>
+              <input type="text" id="edit-prompt-author" class="form-input" value="PromptForge Editor">
+            </div>
+          </div>
+
+          <!-- Featured Prompt Image & Live Preview -->
+          <div class="form-group">
+            <label class="form-label" for="edit-prompt-image">Featured Image URL (High-Resolution AI Output Photo) *</label>
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+              <input type="url" id="edit-prompt-image" class="form-input" placeholder="https://... or /assets/images/default-prompt.svg" style="flex: 1;" required>
+            </div>
+            <div id="edit-image-preview-wrap" style="display: flex; align-items: center; gap: 1.15rem; margin-top: 0.75rem; padding: 0.75rem 1rem; background: #0D0F18; border: 1px solid #23283E; border-radius: 10px;">
+              <div style="width: 58px; height: 72px; border-radius: 8px; overflow: hidden; background: #1A1F30; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 4px 12px rgba(0,0,0,0.4);">
+                <img id="edit-image-preview-img" src="/assets/images/default-prompt.svg" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.onerror=null; this.src='/assets/images/default-prompt.svg';">
+              </div>
+              <div style="font-size: 0.8rem; color: #94A3B8;">
+                <div id="edit-image-status" style="color: #34D399; font-weight: 700; margin-bottom: 2px;">Image ready for live publishing</div>
+                <div>Paste any image link (e.g. PromptPin, Unsplash, Imgur, Cloudinary, WebP, PNG, JPEG).</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="edit-prompt-short-desc">Short Summary / Meta Description (SEO) *</label>
+            <input type="text" id="edit-prompt-short-desc" class="form-input" placeholder="Brief 1-2 sentence description shown in cards and Google search..." required>
+          </div>
+
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <label class="form-label" for="edit-prompt-content">Master Prompt Content *</label>
+              <span id="edit-content-stats" style="font-size: 0.75rem; color: #94A3B8; font-family: var(--font-mono);">0 chars</span>
+            </div>
+            <textarea id="edit-prompt-content" class="form-textarea code-mode" placeholder="Enter complete prompt text. Use [PLACEHOLDER] for variables..." style="min-height: 200px;" required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="edit-prompt-full-desc">How To Use / Guide</label>
+            <textarea id="edit-prompt-full-desc" class="form-textarea" placeholder="Tips for using this prompt, best LLM settings, etc."></textarea>
+          </div>
+
+          <!-- Google SERP Live Preview -->
+          <div class="serp-preview-box">
+            <div class="serp-preview-header">🔍 Live Google Search Result Preview</div>
+            <div id="serp-preview-title" class="serp-title">Prompt Title | PromptForge</div>
+            <div id="serp-preview-url" class="serp-url">https://promptforge.dev/prompt/slug/</div>
+            <div id="serp-preview-desc" class="serp-desc">Short description will appear here on Google.</div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="edit-prompt-status">Publication Status</label>
+              <select id="edit-prompt-status" class="form-select">
+                <option value="published">Published (Public)</option>
+                <option value="draft">Draft (Hidden)</option>
+              </select>
+            </div>
+            <div class="form-group" style="justify-content: center;">
+              <div style="display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1.25rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; cursor: pointer;">
+                  <input type="checkbox" id="edit-prompt-featured">
+                  <span>Mark as Featured Prompt</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; cursor: pointer; color: #F87171; font-weight: 600;">
+                  <input type="checkbox" id="edit-prompt-trending">
+                  <span>🔥 Mark as Trending (Control Trending Feed)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="editor-footer">
+          <button type="button" id="btn-cancel-prompt-edit" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="btn-save-prompt" class="btn btn-primary">Save Prompt</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Category Editor Modal -->
+  <div id="category-editor-modal" class="editor-modal">
+    <div class="editor-dialog" style="max-width: 500px;">
+      <div class="editor-header">
+        <h3 id="category-editor-title" style="font-size: 1.25rem; font-weight: 700;">Add Category</h3>
+        <button id="modal-close-category-editor" class="modal-close" style="color: #94A3B8;">&times;</button>
+      </div>
+      <form id="category-editor-form">
+        <div class="editor-body">
+          <div class="form-group">
+            <label class="form-label" for="edit-cat-name">Category Name *</label>
+            <input type="text" id="edit-cat-name" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-cat-slug">URL Slug *</label>
+            <input type="text" id="edit-cat-slug" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-cat-desc">Description</label>
+            <textarea id="edit-cat-desc" class="form-textarea" style="min-height: 80px;"></textarea>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="edit-cat-order">Display Order</label>
+              <input type="number" id="edit-cat-order" class="form-input" value="10">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="edit-cat-status">Status</label>
+              <select id="edit-cat-status" class="form-select">
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="editor-footer">
+          <button type="submit" class="btn btn-primary">Save Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Quick Image Lightbox Modal for Admin -->
+  <div id="admin-lightbox-modal" class="admin-lightbox-overlay" style="display: none;">
+    <div class="admin-lightbox-card">
+      <button class="admin-lightbox-close" id="btn-close-admin-lightbox" title="Close Preview">✕</button>
+      <div class="admin-lightbox-img-wrap">
+        <img id="admin-lightbox-img" src="/assets/images/default-prompt.svg" alt="Prompt Preview">
+      </div>
+      <div class="admin-lightbox-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+          <span id="admin-lightbox-category" class="card-category-badge" style="font-size:0.8rem;">Category</span>
+          <span id="admin-lightbox-status" class="status-badge published">Published</span>
+        </div>
+        <h3 id="admin-lightbox-title" style="font-size:1.25rem; font-weight:800; color:#FFFFFF; margin-bottom:0.5rem; line-height:1.35;"></h3>
+        <div style="font-family:var(--font-mono); font-size:0.78rem; color:#818CF8; margin-bottom:0.75rem;" id="admin-lightbox-slug"></div>
+        <p id="admin-lightbox-desc" style="font-size:0.875rem; color:#94A3B8; margin-bottom:1rem; line-height:1.5;"></p>
+        
+        <div style="background:#0D0F18; border:1px solid #23283E; border-radius:8px; padding:0.85rem; margin-bottom:1.25rem; max-height:120px; overflow-y:auto;">
+          <div style="font-size:0.72rem; color:#64748B; text-transform:uppercase; font-weight:700; margin-bottom:4px;">Prompt Snippet</div>
+          <div id="admin-lightbox-snippet" style="font-size:0.8rem; color:#E2E8F0; font-family:var(--font-mono); line-height:1.4;"></div>
+        </div>
+
+        <div style="display:flex; gap:0.6rem; justify-content:flex-end; margin-top:auto;">
+          <button id="admin-lightbox-edit-btn" class="btn btn-sm btn-secondary">Edit Prompt</button>
+          <a id="admin-lightbox-view-btn" href="#" target="_blank" class="btn btn-sm btn-primary">Open Public Page ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/main.js"></script>
+  <script src="/js/admin.js"></script>
+  <script src="/js/import.js"></script>
+</body>
+</html>
+
