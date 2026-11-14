@@ -11,3 +11,4 @@
   from = "/adm/*"
   to = "/admin/index.html"
   status = 200
+
