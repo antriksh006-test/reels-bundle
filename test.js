@@ -27,7 +27,7 @@ function runTests() {
   assert(fs.existsSync(promptHtmlPath), `Permanent URL page /prompt/${sampleSlug}/index.html must exist`);
   const promptHtml = fs.readFileSync(promptHtmlPath, 'utf-8');
   assert(promptHtml.includes('<title>'), 'Unique title tag missing');
-  assert(promptHtml.includes('rel="canonical" href="https://reels-bundle.vercel.app/prompt/' + sampleSlug + '/"'), 'Canonical URL tag missing or incorrect');
+  assert(promptHtml.includes('rel="canonical" href="https://prompttzz.netlify.app/prompt/' + sampleSlug + '/"'), 'Canonical URL tag missing or incorrect');
   assert(promptHtml.includes('@type": "CreativeWork"'), 'CreativeWork JSON-LD missing');
   assert(promptHtml.includes('@type": "BreadcrumbList"'), 'BreadcrumbList JSON-LD missing');
   assert(promptHtml.includes('id="master-copy-prompt-btn"'), 'Master copy button missing');
@@ -61,9 +61,9 @@ function runTests() {
   const sitemapPath = path.join(__dirname, 'sitemap.xml');
   assert(fs.existsSync(sitemapPath), 'sitemap.xml must exist');
   const sitemap = fs.readFileSync(sitemapPath, 'utf-8');
-  assert(sitemap.includes('<loc>https://reels-bundle.vercel.app/</loc>'), 'Homepage missing in sitemap');
-  assert(sitemap.includes(`<loc>https://reels-bundle.vercel.app/prompt/${data.prompts[0].slug}/</loc>`), 'Prompt URL missing in sitemap');
-  assert(sitemap.includes(`<loc>https://reels-bundle.vercel.app/category/${data.categories[0].slug}/</loc>`), 'Category URL missing in sitemap');
+  assert(sitemap.includes('<loc>https://prompttzz.netlify.app/</loc>'), 'Homepage missing in sitemap');
+  assert(sitemap.includes(`<loc>https://prompttzz.netlify.app/prompt/${data.prompts[0].slug}/</loc>`), 'Prompt URL missing in sitemap');
+  assert(sitemap.includes(`<loc>https://prompttzz.netlify.app/category/${data.categories[0].slug}/</loc>`), 'Category URL missing in sitemap');
   assert(!sitemap.includes('/admin/'), 'Admin pages must be excluded from sitemap');
   console.log('✅ Test 5 Passed: sitemap.xml structure, inclusion, and exclusion rules verified.');
   passed++;
@@ -73,7 +73,7 @@ function runTests() {
   assert(fs.existsSync(robotsPath), 'robots.txt must exist');
   const robots = fs.readFileSync(robotsPath, 'utf-8');
   assert(robots.includes('Disallow: /admin/'), 'Admin must be disallowed in robots.txt');
-  assert(robots.includes('Sitemap: https://reels-bundle.vercel.app/sitemap.xml'), 'Sitemap directive missing in robots.txt');
+  assert(robots.includes('Sitemap: https://prompttzz.netlify.app/sitemap.xml'), 'Sitemap directive missing in robots.txt');
   console.log('✅ Test 6 Passed: robots.txt rules verified.');
   passed++;
 
